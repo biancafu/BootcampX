@@ -7,14 +7,16 @@ const pool = new Pool({
   host: 'localhost',
   database: 'vagrant'
 });
-
-pool.query(`SELECT DISTINCT teachers.name as teacher, cohorts.name as cohort
+const queryString = `SELECT DISTINCT teachers.name as teacher, cohorts.name as cohort
 FROM assistance_requests
 JOIN teachers ON teacher_id = teachers.id
 JOIN students ON student_id = students.id
 JOIN cohorts ON cohort_id = cohorts.id
-WHERE cohorts.name = '${process.argv[2]}'
-ORDER BY teacher;`)
+WHERE cohorts.name = $1
+ORDER BY teacher;`;
+const cohort_name = process.argv[2];
+const values = [`${cohort_name}`];
+pool.query(queryString, values)
 .then ((result) => {
   for (row of result.rows) {
     console.log(`${row.cohort}: ${row.teacher}`)
